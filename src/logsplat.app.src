@@ -1,0 +1,15 @@
+{application, logsplat,
+ [{description, "Logplex protocol injector."}
+  ,{vsn, "0.1.0"}
+  ,{registered, []}
+  ,{applications,
+    [kernel
+     ,stdlib
+     ,ssl
+     ,cowboy
+    ]}
+  ,{mod, { logsplat_app, []}}
+  ,{env,
+    [
+    ]}
+ ]}.
