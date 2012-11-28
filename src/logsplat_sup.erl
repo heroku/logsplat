@@ -1,5 +1,5 @@
 %%%-------------------------------------------------------------------
-%% @copyright Geoff Cant
+%% @copyright Heroku (2012)
 %% @author Geoff Cant <nem@erlang.geek.nz>
 %% @version {@vsn}, {@date} {@time}
 %% @doc logsplat top level supervisor
