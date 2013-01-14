@@ -18,26 +18,39 @@
 %% API
 %%====================================================================
 
-heroku_test(Count, Token, Url) when is_list(Url),
+heroku_test(Count, Token_s, Url) when is_list(Url),
                                     is_integer(Count),
-                                    Count > 0->
-    RawReq = lsp_request:to_iolist(heroku_test_req(Count, Token, Url)),
+                                    Count > 0 ->
+    RawReq = lsp_request:to_iolist(heroku_test_req(Count, Token_s, Url)),
     {ok, Uri = #ex_uri{}, _} = ex_uri:decode(Url),
     {ok, Pid} = lsp_http_client:start_link(Uri),
     {Pid,
      lsp_http_client:raw_request(Pid, RawReq, 5000)}.
 
-heroku_test_req(Count, Token, Url) ->
+heroku_test_req(Count, Tokens, Url) when is_list(Tokens) ->
+    TCount = length(Tokens),
+    Msgs = [ lsp_msg:heroku(now,
+                            lists:nth((N rem TCount) + 1, Tokens),
+                            "console.1",
+                            io_lib:format("Logsplat test message ~p from ~p.",
+                                          [N, self()]))
+             || N <- lists:seq(1, Count) ],
+    lsp_request:new(Msgs, Url);
+
+heroku_test_req(Count, Token, Url) when is_binary(Token) ->
     {ok,
      Uri0 = #ex_uri{authority = Auth},
      _} = ex_uri:decode(Url),
-    NewAuth = Auth#ex_uri_authority{userinfo = "token:" ++ Token},
+    NewAuth = Auth#ex_uri_authority{userinfo =
+                                        "token:" ++ binary_to_list(Token) },
     Uri = Uri0#ex_uri{authority = NewAuth},
     Msgs = [ lsp_msg:heroku(now, Token, "console.1",
                             io_lib:format("Logsplat test message ~p from ~p.",
                                           [N, self()]))
              || N <- lists:seq(1, Count) ],
     lsp_request:new(Msgs, Uri).
+
+
 
 %%====================================================================
 %% Internal functions
